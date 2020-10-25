@@ -1,0 +1,7 @@
+__pycache__
+.venv/
+.local/
+service-account-key.json
+*.kdbx
+credentials.json
+token.pickle
