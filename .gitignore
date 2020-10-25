@@ -1,6 +1,11 @@
 __pycache__
 .venv/
+dist/
+build/
+.eggs/
+*.egg-info/
 .local/
+.idea/
 service-account-key.json
 *.kdbx
 credentials.json
