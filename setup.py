@@ -17,7 +17,9 @@ setuptools.setup(
         "setuptools~=50.3.0",
         "google-api-python-client~=1.12.5",
         "google-auth-oauthlib~=0.4.1",
-        "google-auth-httplib2~=0.0.4"
+        "google-auth-httplib2~=0.0.4",
+        "google-auth==1.22.1",
+        "six==1.15.0"
     ],
     packages=setuptools.find_packages(),
     classifiers=[
