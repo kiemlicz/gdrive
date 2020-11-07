@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kiemlicz/gdrive",
-    setup_requires=['pytest-runner', 'pytest-pylint'],
+    setup_requires=['pytest', 'pytest-mock', 'pytest-runner', 'pytest-pylint'],
     install_requires=[
         "setuptools~=50.3.0",
         "google-api-python-client~=1.12.5",

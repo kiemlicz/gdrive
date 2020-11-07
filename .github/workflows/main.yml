@@ -21,7 +21,7 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         pip install pytest
         python setup.py install
-    - name: Lint
+    - name: Test
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        pylint gdrive
+        python setup.py test
