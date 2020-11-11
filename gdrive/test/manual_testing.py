@@ -44,7 +44,3 @@ def test_kdbx_auth(kdbx_auth):
 def test_file_auth(file_auth):
     assert file_auth.credentials.valid, "Expected not valid"
     assert not file_auth.credentials.expired, "Expected not expired"
-
-
-def test_client(client):
-    print(client.get("gdrive://path/file?mime_type=text/plain"))
