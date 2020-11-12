@@ -7,6 +7,8 @@ RUN apt-get update && \
 
 COPY gdrive/ /opt/gdrive
 COPY setup.py /opt
+COPY requirements-test.txt /opt
+COPY requirements.txt /opt
 COPY README.md /opt
 
 WORKDIR /opt

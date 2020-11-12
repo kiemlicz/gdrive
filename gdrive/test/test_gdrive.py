@@ -3,6 +3,7 @@ from typing import List, Dict, Any
 
 import pytest
 
+from google.oauth2.service_account import Credentials
 from gdrive.auth import GoogleAuth
 from gdrive.client import GDriveClient
 
@@ -88,7 +89,8 @@ def files():
 
 @pytest.fixture(scope="session")
 def client():
-    auth = GoogleAuth(None)
+    cred = Credentials(None, None, None)
+    auth = GoogleAuth(cred)
     c = GDriveClient(auth)
     yield c
 
