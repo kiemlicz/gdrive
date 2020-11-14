@@ -1,4 +1,5 @@
 import setuptools
+import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -7,7 +8,8 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name="gdrive",
-    version="0.0.1",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="kiemlicz",
     author_email="stanislaw.dev@gmail.com",
     description="Google Drive simple client",
