@@ -32,6 +32,13 @@ def file_auth(scopes):
 
 
 @pytest.fixture(scope="session")
+def secretstorage_auth(scopes):
+    attributes = {"kdbx": "credentials"}
+    token_file = "gdrive/test/token.pickle"
+    yield GoogleAuth.from_secretservice(attributes, token_file, scopes)
+
+
+@pytest.fixture(scope="session")
 def client(kdbx_auth):
     yield GDriveClient(kdbx_auth)
 
@@ -44,3 +51,8 @@ def test_kdbx_auth(kdbx_auth):
 def test_file_auth(file_auth):
     assert file_auth.credentials.valid, "Expected not valid"
     assert not file_auth.credentials.expired, "Expected not expired"
+
+
+def test_secretservice_auth(secretstorage_auth):
+    assert secretstorage_auth.credentials.valid, "Expected not valid"
+    assert not secretstorage_auth.credentials.expired, "Expected not expired"

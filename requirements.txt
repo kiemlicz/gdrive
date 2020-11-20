@@ -8,3 +8,4 @@ google-auth-oauthlib~=0.4.1
 google-auth-httplib2~=0.0.4
 google-auth==1.22.1
 argparse~=1.4.0
+SecretStorage~=3.2.0

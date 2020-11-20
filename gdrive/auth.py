@@ -2,7 +2,8 @@ import json
 import logging
 import os
 import pickle
-from typing import Type, TypeVar, List
+import secretstorage
+from typing import Type, TypeVar, List, Dict
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -31,6 +32,28 @@ class GoogleAuth:
                 credentials.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(secrets_file, scopes)
+                credentials = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open(token_file, 'wb') as token:
+                pickle.dump(credentials, token)
+        return GoogleAuth(credentials)
+
+    @classmethod
+    def from_secretservice(cls: Type[GA], attributes: Dict[str, str], token_file: str, scopes: List[str]) -> GA:
+        credentials = None
+        if os.path.exists(token_file):
+            with open(token_file, 'rb') as token:
+                credentials = pickle.load(token)
+            # If there are no (valid) credentials available, let the user log in.
+        if not credentials or not credentials.valid:
+            if credentials and credentials.expired and credentials.refresh_token:
+                credentials.refresh(Request())
+            else:
+                connection = secretstorage.dbus_init()
+                collection = secretstorage.get_default_collection(connection)
+                config_json = next(collection.search_items(attributes)).get_secret().decode("UTF-8")
+                config = json.loads(config_json)
+                flow = InstalledAppFlow.from_client_config(config, scopes)
                 credentials = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open(token_file, 'wb') as token:
