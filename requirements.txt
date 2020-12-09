@@ -2,8 +2,9 @@ setuptools~=50.3.2
 wheel~=0.32.3
 versioneer~=0.19
 pykeepass~=3.2.0
-six~=1.15.0
-google-api-python-client~=1.12.5
+six<1.13.0 # for Debian Buster
+google-api-python-client~=1.11.0 # due to six version incompatibility with Debian Buster
+google-api-core<=1.22.2 # due to six version incompatibility with Debian Buster
 google-auth-oauthlib~=0.4.1
 google-auth-httplib2~=0.0.4
 google-auth==1.22.1

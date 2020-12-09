@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class GoogleAuth:
-    def __init__(self, credentials: Credentials):
+    def __init__(self, credentials: Credentials, **kwargs):
         self.credentials = credentials
 
     @classmethod
