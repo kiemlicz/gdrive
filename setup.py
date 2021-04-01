@@ -3,8 +3,13 @@ import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
+
+try:
+    with open('requirements.txt') as f:
+        requirements = f.read().splitlines()
+except FileNotFoundError:
+    with open('gdrive.egg-info/requires.txt') as f:
+        requirements = f.read().splitlines()
 
 setuptools.setup(
     name="gdrive",

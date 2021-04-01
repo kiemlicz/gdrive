@@ -64,13 +64,14 @@ class GoogleAuth:
     def from_kdbx(cls: Type[GA], kdbx: PyKeePass, path: str, token_attachment: str, secrets_attachment: str,
                   scopes: List[str]) -> GA:
         credentials = None
-        entry = kdbx.find_entries_by_path(path)
+        path_list = list(filter(None, path.split('/')))
+        entry = kdbx.find_entries_by_path(path_list)
         token_attachments = [a for a in entry.attachments if a.filename == token_attachment]
         secrets_file = [a.data for a in entry.attachments if a.filename == secrets_attachment]
         if len(secrets_file) < 1:
-            raise SettingsException(f"No KDBX attachments: {secrets_attachment} for: {path}")
+            raise SettingsException(f"No KDBX attachments: {secrets_attachment} for: {path_list}")
         if len(secrets_file) > 1:
-            raise SettingsException(f"Too many KDBX attachments for: {path}")
+            raise SettingsException(f"Too many KDBX attachments for: {path_list}")
 
         if len(token_attachments) == 1:
             log.info("Token found in KDBX")
@@ -92,5 +93,5 @@ class GoogleAuth:
                 entry.delete_attachment(token_attachment)
             entry.add_attachment(bin_id, token_attachment)
             kdbx.save()
-            log.info(f"Updated KDBX: {path} entry")
+            log.info(f"Updated KDBX: {path_list} entry")
         return GoogleAuth(credentials)
