@@ -4,6 +4,7 @@ from pykeepass import PyKeePass
 from gdrive.auth import GoogleAuth
 from gdrive.client import GDriveClient
 
+# Run with python -m pytest gdrive/test/manual_testing.py
 
 @pytest.fixture(scope="session")
 def scopes():
