@@ -1,7 +1,10 @@
 from urllib.parse import urlparse, parse_qs
 
+from typing import Any, Dict, Tuple
+from urllib.parse import ParseResult
 
-def query_string_to_dict(qs):
+
+def query_string_to_dict(qs) -> Tuple[ParseResult, Dict[str, Any]]:
     query_parsed = urlparse(qs)
     query_dict = parse_qs(query_parsed.query)
 

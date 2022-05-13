@@ -4,3 +4,11 @@ class SettingsException(RuntimeError):
 
 class GDriveException(RuntimeError):
     pass
+
+
+class GDriveNoSuchFileException(GDriveException):
+    pass
+
+
+class GDriveNoSuchFileMetaException(GDriveException):
+    pass
