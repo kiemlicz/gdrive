@@ -105,7 +105,7 @@ def test_file_get(client: GDriveClient, files, mocker):
 def test_walk(client: GDriveClient, files, mocker):
     s = TestService(files)
     with mocker.patch.object(client, 'service', s):
-        files = client.walk("gdrive://path/dir1", "/")
+        files = client.walk("gdrive://path/dir1")
         nested = [f['content'] for f in files if f['mimeType'] == 'application/vnd.google-apps.folder']
         assert len(files) == 2
         assert len(nested) == 1
