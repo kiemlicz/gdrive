@@ -9,7 +9,6 @@ from urllib.parse import urlparse, parse_qs
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from pykeepass import PyKeePass
 
 from gdrive.exception import SettingsException
 
@@ -43,7 +42,12 @@ class GoogleAuth:
             else:
                 parsed_qs = urlparse(secrets_file_qs)
                 if parsed_qs.scheme.startswith('http'):
-                    res = urllib.request.urlopen(secrets_file_qs, context=ssl_context)
+                    try:
+                        res = urllib.request.urlopen(secrets_file_qs, context=ssl_context)
+                    except ConnectionRefusedError as e:
+                        msg = f"Cannot connect to secret API: {secrets_file_qs}"
+                        log.exception(msg)
+                        raise SettingsException(msg)
                     data = json.loads(res.read().decode(res.info().get_param('charset') or 'utf-8'))
                     config = next((json.loads(e['secret']) for e in data))
                     flow = InstalledAppFlow.from_client_config(config, scopes)
