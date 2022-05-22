@@ -98,7 +98,7 @@ def client():
 def test_file_get(client: GDriveClient, files, mocker):
     s = TestService(files)
     with mocker.patch.object(client, 'service', s):
-        file = client.get("gdrive://path/file?mime_type=text/plain")
+        file = client.get("gdrive:///path/file?mime_type=text/plain")
         assert file == "filecontent", f"Assert failed, expected: filecontent, but received: {file}"
 
 

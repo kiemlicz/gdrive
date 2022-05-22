@@ -29,7 +29,7 @@ class GDriveClient:
         log.debug(f"finding file: {path_qs}")
         query_parsed, query_dict = query_string_to_dict(path_qs)
         mime_type = query_dict.get("mime_type", None)
-        file_meta = self.get_file_meta(path_qs)
+        file_meta = self.get_file_meta(query_parsed.path)
         contents = self.get_file(file_meta, mime_type)
         if mime_type == "text/plain":
             return contents.decode("utf-8")
