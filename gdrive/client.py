@@ -168,6 +168,13 @@ class GDriveClient:
                 fields="id"
             ).execute()
 
+    def trash(self, file_id: str):
+        return self.service.files().update(
+            fileId=file_id,
+            body={'trashed': True},
+            fields="id"
+        ).execute()
+
     def _list_children(self, parent_meta: Dict[str, Any], query_dict: Dict[str, Any] = {}) -> List[Any]:
         def query(extra_params={}):
             r = self.service.files().list(
