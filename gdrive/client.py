@@ -145,7 +145,6 @@ class GDriveClient:
             return ret
 
         uploaded_file_meta = self._traverse(dest, if_not_exists)
-        log.info(f"uploaded: {uploaded_file_meta}")
 
         if 'name' in uploaded_file_meta and uploaded_file_meta['name'] == filename:
             log.info(f"Updating: {filename}")
