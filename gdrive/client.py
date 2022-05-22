@@ -72,7 +72,8 @@ class GDriveClient:
         :param exclude_pat:
         :return:
         """
-        start_path = urlparse(path_qs).path
+        query_parsed, query_dict = query_string_to_dict(path_qs)
+        start_path = query_parsed.path
         log.debug(f"walk: {path_qs}, start_path: {start_path}")
         dir_file_meta = self.get_file_meta(path_qs)
 
@@ -86,7 +87,7 @@ class GDriveClient:
                 return self._check_include_exclude(relpath, include_pat, exclude_pat)
 
             return [(merge(e, cpath) if e['mimeType'] == 'application/vnd.google-apps.folder' else e) for e
-                    in filter(f, self._list_children(current_file_meta))]
+                    in filter(f, self._list_children(current_file_meta, query_dict))]
 
         return loop(dir_file_meta, start_path)
 
@@ -108,6 +109,12 @@ class GDriveClient:
             return {'id': 'root', 'mimeType': ''}
         else:
             return self._traverse(path_qs, no_file)
+
+    def get_file_meta_by_id(self, file_id: str, fields: str) -> Dict[str, Any]:
+        return self.service.files().get(
+            fileId=file_id,
+            fields=fields,
+        ).execute()
 
     def upload(self, dest_qs: str, file_to_upload: str, file_meta: Dict[str, Any] = {}):
         query_parsed, query_dict = query_string_to_dict(dest_qs)
@@ -162,7 +169,7 @@ class GDriveClient:
                 fields="id"
             ).execute()
 
-    def _list_children(self, parent_meta: Dict[str, Any]) -> List[Any]:
+    def _list_children(self, parent_meta: Dict[str, Any], query_dict: Dict[str, Any] = {}) -> List[Any]:
         def query(extra_params={}):
             r = self.service.files().list(
                 q="'{}' in parents and trashed = false".format(parent_meta['id']),
@@ -171,17 +178,19 @@ class GDriveClient:
             self._assert_incomplete_search(r)
             return r
 
-        json_response = query()
+        extra = query_dict.copy()
+        json_response = query(extra)
         ret_list = json_response['files']
         while 'nextPageToken' in json_response:
             log.debug(f"Fetching next page of files under: {parent_meta}")
-            json_response = query({'pageToken': json_response['nextPageToken']})
+            {'pageToken': json_response['nextPageToken']}
+            extra.update({'pageToken': json_response['nextPageToken']})
+            json_response = query(extra)
             ret_list.extend(json_response['files'])
         return ret_list
 
-    def _path_to_list(self, path) -> List[str]:
-        source = urlparse(path)
-        p = source.netloc + source.path
+    def _path_to_list(self, parsed_path) -> List[str]:
+        p = parsed_path.netloc + parsed_path.path
         return p.strip(os.sep).split(os.sep)
 
     def _assert_incomplete_search(self, json_response):
@@ -189,13 +198,14 @@ class GDriveClient:
             raise GDriveException('google drive query ended due to incompleteSearch')
 
     def _traverse(self, path_qs: str, on_empty=None):
-        path_segment_list = self._path_to_list(path_qs)
+        query_parsed, query_dict = query_string_to_dict(path_qs)
+        path_segment_list = self._path_to_list(query_parsed)
 
         def go(parent_meta, idx) -> Dict[str, Any]:
             if idx >= len(path_segment_list):
                 return parent_meta
             next_name = path_segment_list[idx]
-            file_list = self._list_children(parent_meta)
+            file_list = self._list_children(parent_meta, query_dict)
             r = [e for e in file_list if e['name'] == next_name]
             if len(r) > 0:
                 # don't care if name occurred in other pages or already multiple times
