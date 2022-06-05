@@ -4,12 +4,11 @@ import os
 import pickle
 import secretstorage
 import urllib.request
+import base64
 from typing import Type, TypeVar, List, Dict
 from urllib.parse import urlparse, parse_qs
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-
 from gdrive.exception import SettingsException
 
 GA = TypeVar('GA', bound='GoogleAuth')
@@ -31,26 +30,41 @@ class GoogleAuth:
         :param scopes:
         :return:
         '''
+
+        def fetch():
+            try:
+                res = urllib.request.urlopen(secrets_file_qs, context=ssl_context)
+            except ConnectionRefusedError as e:
+                msg = f"Cannot connect to secret API: {secrets_file_qs}"
+                log.exception(msg)
+                raise SettingsException(msg)
+            data = json.loads(res.read().decode(res.info().get_param('charset') or 'utf-8'))
+            config = data[0]
+            return config
+
+        parsed_qs = urlparse(secrets_file_qs)
         credentials = None
         if os.path.exists(token_file):
             with open(token_file, 'rb') as token:
                 credentials = pickle.load(token)
+        elif parsed_qs.scheme.startswith('http'):
+            config = fetch()
+            remote_token = next((e[1] for e in config['attachments'] if e[0] == token_file), None)
+            if remote_token:
+                credentials = pickle.loads(base64.b64decode(remote_token))
+
         # If there are no (valid) credentials available, let the user log in.
         if not credentials or not credentials.valid:
             if credentials and credentials.expired and credentials.refresh_token:
                 credentials.refresh(Request())
             else:
-                parsed_qs = urlparse(secrets_file_qs)
+                from google_auth_oauthlib.flow import InstalledAppFlow
+
                 if parsed_qs.scheme.startswith('http'):
-                    try:
-                        res = urllib.request.urlopen(secrets_file_qs, context=ssl_context)
-                    except ConnectionRefusedError as e:
-                        msg = f"Cannot connect to secret API: {secrets_file_qs}"
-                        log.exception(msg)
-                        raise SettingsException(msg)
-                    data = json.loads(res.read().decode(res.info().get_param('charset') or 'utf-8'))
-                    config = next((json.loads(e['secret']) for e in data))
-                    flow = InstalledAppFlow.from_client_config(config, scopes)
+                    if config is None:
+                        config = fetch()
+                    secret_json = json.loads(config['secret'])
+                    flow = InstalledAppFlow.from_client_config(secret_json, scopes)
                 elif parsed_qs.scheme == 'file' or parsed_qs.scheme == '':
                     secrets_file = parsed_qs.path
                     flow = InstalledAppFlow.from_client_secrets_file(secrets_file, scopes)
@@ -61,4 +75,5 @@ class GoogleAuth:
             # Save the credentials for the next run
             with open(token_file, 'wb') as token:
                 pickle.dump(credentials, token)
+                # todo all creadentials present, upload to underlying password service?
         return GoogleAuth(credentials)
