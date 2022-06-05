@@ -76,4 +76,5 @@ class GoogleAuth:
             with open(token_file, 'wb') as token:
                 pickle.dump(credentials, token)
                 # todo all creadentials present, upload to underlying password service?
+                # the token might got refreshed - it would be good to upload it
         return GoogleAuth(credentials)
