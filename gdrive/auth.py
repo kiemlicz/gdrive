@@ -10,6 +10,7 @@ from urllib.parse import urlparse, parse_qs
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from gdrive.exception import SettingsException
+from pathlib import Path
 
 GA = TypeVar('GA', bound='GoogleAuth')
 log = logging.getLogger(__name__)
@@ -74,6 +75,7 @@ class GoogleAuth:
 
                 credentials = flow.run_local_server(port=0)
             # Save the credentials for the next run
+            Path(token_file).parent.mkdir(exist_ok=True, parents=True)
             with open(token_file, 'wb') as token:
                 pickle.dump(credentials, token)
                 # todo all creadentials present, upload to underlying password service?
