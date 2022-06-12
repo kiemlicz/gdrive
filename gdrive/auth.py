@@ -49,7 +49,8 @@ class GoogleAuth:
                 credentials = pickle.load(token)
         elif parsed_qs.scheme.startswith('http'):
             config = fetch()
-            remote_token = next((e[1] for e in config['attachments'] if e[0] == token_file), None)
+            token_file_basename = os.path.basename(token_file)
+            remote_token = next((e[1] for e in config['attachments'] if e[0] == token_file_basename), None)
             if remote_token:
                 credentials = pickle.loads(base64.b64decode(remote_token))
 
